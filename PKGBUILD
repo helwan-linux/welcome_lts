@@ -1,11 +1,11 @@
 # Maintainer: Saeed Badrelden <saeedbadrelden2021@gmail.com>
-pkgname=hel-welcome-app
-_pkgname=hel-welcome-app
-pkgver=4
-pkgrel=00
+pkgname=welcome_lts
+_pkgname=welcome_lts
+pkgver=1
+pkgrel=01
 pkgdesc="Welcome application for helwanlinux"
 arch=('any')
-url="https://github.com/helwan-linux/helwan-welcome"
+url="https://github.com/helwan-linux/welcome_lts"
 license=('GPL3')
 conflicts=('helwan-welcome-app')
 makedepends=('git')
