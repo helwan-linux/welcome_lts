@@ -653,61 +653,34 @@ class WelcomeApp(QWidget):
 	
 
 	def install_linux_ml(self):
-		# أمر التثبيت وطلب ضبط الإقلاع الافتراضي
 		cmd_logic = (
+			"set -e && "
 			"pacman -S --needed linux linux-headers && "
-			"echo \"Installation successful. Press 'Y' to set MainLine kernel as default.\" && "
-			"read -r -p \"Set MainLine as default kernel? (y/N): \" response && "
-			"if [[ \"$response\" =~ ^([yY][eE][sS]|[yY])$ ]]; then "
-			"grub-set-default \"Advanced options for Arch Linux>Arch Linux, with Linux\" && "
-			"echo \"MainLine kernel set as default.\" ; "
-			"else "
-			"echo \"MainLine kernel installed but not set as default.\" ; "
-			"fi ; "
-			
-			# *** هذا السطر يضمن تحديث GRUB ليظهر الكيرنل الجديد دائمًا ***
-			"grub-mkconfig -o /boot/grub/grub.cfg && " 
-			
-			"echo \"GRUB updated. Please reboot to see changes.\" ; "
-			"exit 0"
+			"grub-mkconfig -o /boot/grub/grub.cfg && "
+			"echo \"GRUB updated. Select kernel from GRUB menu.\""
 		)
-		
-		# الهروب من علامات التنصيص المزدوجة داخل الأمر
-		escaped_cmd_logic = cmd_logic.replace('"', '\\"') 
 
-		# نحتاج إلى تشغيل pkexec bash -c "..."
+		escaped_cmd_logic = cmd_logic.replace('"', '\\"')
 		full_command = f"pkexec bash -c \"{escaped_cmd_logic}\""
 
 		self.run_terminal_cmd(full_command, _("Installing Linux Kernel"))
 
 
-	def install_linux_zen(self):
-		# أمر التثبيت وطلب ضبط الإقلاع الافتراضي
-		cmd_logic = (
-			"pacman -S --needed linux-zen linux-zen-headers && "
-			"echo \"Installation successful. Press 'Y' to set Zen kernel as default.\" && "
-			"read -r -p \"Set Zen as default kernel? (y/N): \" response && "
-			"if [[ \"$response\" =~ ^([yY][eE][sS]|[yY])$ ]]; then "
-			"grub-set-default \"Advanced options for Arch Linux>Arch Linux, with Linux zen\" && "
-			"echo \"Zen kernel set as default.\" ; "
-			"else "
-			"echo \"Zen kernel installed but not set as default.\" ; "
-			"fi ; "
-			
-			# *** هذا السطر يضمن تحديث GRUB ليظهر الكيرنل الجديد دائمًا ***
-			"grub-mkconfig -o /boot/grub/grub.cfg && " 
-			
-			"echo \"GRUB updated. Please reboot to see changes.\" ; "
-			"exit 0"
-		)
-		
-		# الهروب من علامات التنصيص المزدوجة داخل الأمر
-		escaped_cmd_logic = cmd_logic.replace('"', '\\"') 
 
-		# نحتاج إلى تشغيل pkexec bash -c "..."
+	def install_linux_zen(self):
+		cmd_logic = (
+			"set -e && "
+			"pacman -S --needed linux-zen linux-zen-headers && "
+			"grub-mkconfig -o /boot/grub/grub.cfg && "
+			"echo \"GRUB updated. Linux Zen is now available in the boot menu.\""
+		)
+
+		escaped_cmd_logic = cmd_logic.replace('"', '\\"')
 		full_command = f"pkexec bash -c \"{escaped_cmd_logic}\""
 
 		self.run_terminal_cmd(full_command, _("Installing Linux Zen Kernel"))
+
+
 
 
 	def apply_system_language(self):
