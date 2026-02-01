@@ -653,39 +653,32 @@ class WelcomeApp(QWidget):
 	
 
 	def install_linux_ml(self):
-		script = """
-pacman -Sy --needed linux linux-headers
-grub-mkconfig -o /boot/grub/grub.cfg
-echo "--------------------------------------------------"
-read -p "Set Linux Kernel as default? (y/N): " res
-if [[ "$res" =~ ^([yY][eE][sS]|[yY])$ ]]; then
-	grub-set-default 0
-	echo "Done: Mainline Kernel set as default."
-fi
-exit
-"""
-		safe_script = script.replace('"', '\\"').replace('$', '\\$')
-		full_command = f'pkexec bash -c "{safe_script}"'
+		# أمر التثبيت وطلب ضبط الإقلاع الافتراضي
+		cmd_logic = (
+			"pacman -S --needed linux linux-headers && "
+			"echo \"Installation successful. Press 'Y' to set MainLine kernel as default.\" && "
+			"read -r -p \"Set MainLine as default kernel? (y/N): \" response && "
+			"if [[ \"$response\" =~ ^([yY][eE][sS]|[yY])$ ]]; then "
+			"grub-set-default \"Advanced options for Arch Linux>Arch Linux, with Linux\" && "
+			"echo \"MainLine kernel set as default.\" ; "
+			"else "
+			"echo \"MainLine kernel installed but not set as default.\" ; "
+			"fi ; "
+			
+			# *** هذا السطر يضمن تحديث GRUB ليظهر الكيرنل الجديد دائمًا ***
+			"grub-mkconfig -o /boot/grub/grub.cfg && " 
+			
+			"echo \"GRUB updated. Please reboot to see changes.\" ; "
+			"exit 0"
+		)
+		
+		# الهروب من علامات التنصيص المزدوجة داخل الأمر
+		escaped_cmd_logic = cmd_logic.replace('"', '\\"') 
+
+		# نحتاج إلى تشغيل pkexec bash -c "..."
+		full_command = f"pkexec bash -c \"{escaped_cmd_logic}\""
+
 		self.run_terminal_cmd(full_command, _("Installing Linux Kernel"))
-
-	def install_linux_zen(self):
-		script = """
-pacman -Sy --needed linux-zen linux-zen-headers
-grub-mkconfig -o /boot/grub/grub.cfg
-echo "--------------------------------------------------"
-read -p "Set Linux Zen Kernel as default? (y/N): " res
-if [[ "$res" =~ ^([yY][eE][sS]|[yY])$ ]]; then
-	grub-set-default 0
-	echo "Done: Zen Kernel set as default."
-fi
-exit
-"""
-		safe_script = script.replace('"', '\\"').replace('$', '\\$')
-		full_command = f'pkexec bash -c "{safe_script}"'
-		self.run_terminal_cmd(full_command, _("Installing Linux Zen Kernel"))
-
-
-
 
 
 	def install_linux_zen(self):
