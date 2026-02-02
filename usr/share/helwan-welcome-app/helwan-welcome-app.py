@@ -655,15 +655,18 @@ class WelcomeApp(QWidget):
 	def install_linux_ml(self):
 		cmd_logic = (
 			"set -e && "
-			"pacman -S --needed linux linux-headers && "
+			"pacman -S linux linux-headers --overwrite '*' && "
+			"mkinitcpio -P && "
 			"grub-mkconfig -o /boot/grub/grub.cfg && "
-			"echo \"GRUB updated. Select kernel from GRUB menu.\""
+			"echo \"GRUB updated. Linux kernel is now available in the boot menu.\""
 		)
+
 
 		escaped_cmd_logic = cmd_logic.replace('"', '\\"')
 		full_command = f"pkexec bash -c \"{escaped_cmd_logic}\""
 
 		self.run_terminal_cmd(full_command, _("Installing Linux Kernel"))
+
 
 
 
