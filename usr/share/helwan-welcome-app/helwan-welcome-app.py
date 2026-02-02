@@ -183,7 +183,7 @@ class WelcomeApp(QWidget):
 		# استرجاع اللغة المحفوظة وتطبيقها
 		if self.app_lang_combobox:
 			saved_language_index = self.settings.value("language_index", 0, type=int)
-			if saved_language_index == 1: saved_language_index = 0
+			# لا تقم بتعديل index هنا
 			self.app_lang_combobox.setCurrentIndex(saved_language_index)
 			self.change_language(self.app_lang_combobox.currentText())
 
@@ -194,6 +194,8 @@ class WelcomeApp(QWidget):
 			if index != -1:
 				self.theme_combobox.setCurrentIndex(index)
 				self.load_theme(saved_theme)
+
+
 
 	def check_startup_enabled(self):
 		autostart_dir = os.path.expanduser("~/.config/autostart")
