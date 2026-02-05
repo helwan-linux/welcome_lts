@@ -17,40 +17,38 @@ source=(${_pkgname}::"git+${url}")
 sha256sums=('SKIP')
 
 package() {
-
-    # تثبيت مجلد التطبيق بالكامل إلى /usr/share
+    # 1. تثبيت مجلد التطبيق
     install -Dm755 -d "$pkgdir/usr/share/helwan-welcome-app"
-    cp -r "${srcdir}/${_pkgname}/usr/share/helwan-welcome-app/" "$pkgdir/usr/share/"
-    
-  # تثبيت الملف التنفيذي (سكربت بايثون) في المسار الصحيح
-  install -Dm755 "${srcdir}/${_pkgname}/usr/share/helwan-welcome-app/helwan-welcome-app.py" "$pkgdir/usr/bin/helwan-welcome-app"
+    cp -r "${srcdir}/${_pkgname}/usr/share/helwan-welcome-app/"* "$pkgdir/usr/share/helwan-welcome-app/"
 
-  # إنشاء مجلد تطبيقات إذا لم يكن موجودًا
-  install -dm755 "$pkgdir/usr/share/applications"
+    # 2. إنشاء ملف التشغيل لحل مشكلة الـ Import ولعمل اختصار welcome_lts
+    install -dm755 "$pkgdir/usr/bin"
+    echo -e "#!/bin/bash\ncd /usr/share/helwan-welcome-app/ && python helwan-welcome-app.py \"\$@\"" > "$pkgdir/usr/bin/helwan-welcome-app"
+    chmod +755 "$pkgdir/usr/bin/helwan-welcome-app"
+    ln -sf /usr/bin/helwan-welcome-app "$pkgdir/usr/bin/welcome_lts"
 
-  # تثبيت ملف .desktop في المسار الصحيح
-  install -Dm644 "${srcdir}/${_pkgname}/usr/share/applications/helwan-welcome-app.desktop" "$pkgdir/usr/share/applications/helwan-welcome-app.desktop"
+    # 3. تثبيت ملف الـ .desktop
+    install -Dm644 "${srcdir}/${_pkgname}/usr/share/applications/helwan-welcome-app.desktop" "$pkgdir/usr/share/applications/helwan-welcome-app.desktop"
 
-  # إنشاء مجلد أيقونات التطبيقات القابلة للتطوير إذا لم يكن موجودًا
-  install -dm755 "$pkgdir/usr/share/icons/hicolor/scalable/apps"
-  install -dm755 "$pkgdir/usr/share/icons/hicolor/512x512/apps"
+    # 4. تعديل جزء الأيقونات (تثبيت مباشر للمسارات المطلوبة)
+    install -dm755 "$pkgdir/usr/share/icons/hicolor/scalable/apps"
+    install -dm755 "$pkgdir/usr/share/icons/hicolor/512x512/apps"
 
-  # تثبيت ملفات الأيقونة في المسارات الصحيحة
-  find "${srcdir}/${_pkgname}/usr/share/hicolor" -name "helwan-welcom.*" -print0 | while IFS= read -r -d $'\0' file; do
-    if [[ "$(basename "$file")" == "helwan-welcom.svg" ]]; then
-      install -Dm644 "$file" "$pkgdir/usr/share/icons/hicolor/scalable/apps/helwan-welcome.svg"
-    elif [[ "$(basename "$file")" == "helwan-welcom.png" ]]; then
-      install -Dm644 "$file" "$pkgdir/usr/share/icons/hicolor/512x512/apps/helwan-welcome.png"
-    fi
-  done
+    # البحث عن ملفات الأيقونة وتثبيتها بالاسم الصحيح الذي يطلبه ملف الـ .desktop
+    find "${srcdir}/${_pkgname}/usr/share/hicolor" -name "helwan-welcom.*" -print0 | while IFS= read -r -d $'\0' file; do
+        if [[ "$(basename "$file")" == "helwan-welcom.svg" ]]; then
+            install -Dm644 "$file" "$pkgdir/usr/share/icons/hicolor/scalable/apps/helwan-welcome.svg"
+        elif [[ "$(basename "$file")" == "helwan-welcom.png" ]]; then
+            install -Dm644 "$file" "$pkgdir/usr/share/icons/hicolor/512x512/apps/helwan-welcome.png"
+        fi
+    done
 
-  # نسخ ملفات الترجمة إذا كانت موجودة
-find "${srcdir}/${_pkgname}/usr/share/helwan-welcome-app/locales" -name "base.mo" -print0 | while IFS= read -r -d $'\0' file; do
-  lang_dir=$(basename "$(dirname "$(dirname "$file")")")
-  install -Dm644 "$file" "$pkgdir/usr/share/locale/$lang_dir/LC_MESSAGES/base.mo"
-done
+    # 5. ملفات الترجمة والترخيص
+    find "${srcdir}/${_pkgname}/usr/share/helwan-welcome-app/locales" -name "base.mo" -print0 | while IFS= read -r -d $'\0' file; do
+        lang_dir=$(basename "$(dirname "$(dirname "$file")")")
+        install -Dm644 "$file" "$pkgdir/usr/share/locale/$lang_dir/LC_MESSAGES/base.mo"
+    done
 
-  # نسخ أي ملفات ترخيص أخرى بشكل صحيح
-  install -dm755 "$pkgdir/usr/share/licenses/${pkgname}"
-  install -Dm644 "${srcdir}/${_pkgname}/LICENSE" "$pkgdir/usr/share/licenses/${pkgname}/LICENSE"
+    install -dm755 "$pkgdir/usr/share/licenses/${pkgname}"
+    install -Dm644 "${srcdir}/${_pkgname}/LICENSE" "$pkgdir/usr/share/licenses/${pkgname}/LICENSE"
 }
