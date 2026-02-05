@@ -16,16 +16,18 @@ import platform
 import psutil
 import shutil
 
+from services_tab import create_services_tab
+from feedback_tab import create_feedback_tab
 
 # === إعداد الترجمة ===
 def load_translation(language_code):
-    locale_path = '/usr/share/locale'
-    try:
-        translation = gettext.translation('base', localedir=locale_path, languages=[language_code])
-        translation.install()
-        return translation.gettext
-    except FileNotFoundError:
-        return lambda s: s
+	locale_path = '/usr/share/locale'
+	try:
+		translation = gettext.translation('base', localedir=locale_path, languages=[language_code])
+		translation.install()
+		return translation.gettext
+	except FileNotFoundError:
+		return lambda s: s
 
 
 DEFAULT_LANGUAGE_CODE = 'en'
@@ -331,16 +333,25 @@ class WelcomeApp(QWidget):
 
 	def init_ui(self):
 		main_layout = QVBoxLayout(self)
+
+		# التبويبات الرئيسية
 		self.tabs.addTab(self.create_main_tab(), _("Welcome"))
 		self.tabs.addTab(self.create_cleaner_tab(), _("System Cleaner"))
-		# هنا ممكن نضيف تبويب جديد لو عايزين نضيف ميزة حذف مجلدات المزامنة
+		# تبويب Services / Quick Fixes
+		self.tabs.addTab(create_services_tab(self, self.run_terminal_cmd, _), _("System Services"))
+		# ممكن لاحقًا: Sync Cleaner
 		# self.tabs.addTab(self.create_sync_cleaner_tab(), _("Sync Cleaner"))
-		main_layout.addWidget(self.tabs)
 
+		main_layout.addWidget(self.tabs)
 		self.setLayout(main_layout)
+		
+		self.tabs.addTab(create_feedback_tab(self, _), _("Feedback"))
+
+		# إعدادات نافذة
 		self.setWindowTitle(_("Welcome to Helwan Linux"))
 		self.setGeometry(100, 100, 600, 400)
 
+		# تحميل الإعدادات
 		self.load_settings()
 
 	# دالة لإنشاء تبويب منظف المزامنة (لسه هنضيف جواه عناصر واجهة المستخدم)
@@ -609,11 +620,9 @@ class WelcomeApp(QWidget):
 				f.write("Name=Helwan Welcome\n")
 				f.write("Comment=Welcome application for Helwan Linux\n")
 				if self.logo:
-					# افتراض أن الشعار موجود في نفس دليل السكريبت أو يمكنك توفير مسار مطلق
-					logo_base_name = os.path.basename(
-						os.path.join(os.path.dirname(os.path.abspath(__file__)), "sources", "logo.png"))
-					f.write(
-						f"Icon={os.path.join(os.path.dirname(os.path.abspath(__file__)), 'sources', logo_base_name)}\n")
+					logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sources", "logo.png")
+					self.setWindowIcon(QIcon(logo_path))
+					f.write(f"Icon={os.path.join(os.path.dirname(os.path.abspath(__file__)), 'sources', logo_base_name)}\n")
 		else:
 			if os.path.exists(startup_file_path):
 				os.remove(startup_file_path)
