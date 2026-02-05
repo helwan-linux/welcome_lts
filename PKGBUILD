@@ -2,7 +2,7 @@
 pkgname=welcome_lts
 _pkgname=welcome_lts
 pkgver=1
-pkgrel=01
+pkgrel=02
 pkgdesc="Welcome application for helwanlinux"
 arch=('any')
 url="https://github.com/helwan-linux/welcome_lts"
